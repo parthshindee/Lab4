@@ -141,3 +141,21 @@ export function renderProjects(projects, containerElement, headingLevel = 'h2') 
     containerElement.appendChild(article);
   });
 }
+
+export async function fetchJSON(url) {
+  try {
+    const response = await fetch(url);
+    console.log('fetch response:', response);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching or parsing JSON data:', error);
+    return [];
+  }
+}
+
+export async function fetchGitHubData(username) {
+  return await fetchJSON(`https://api.github.com/users/${username}`);
+}
