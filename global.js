@@ -19,7 +19,7 @@ const pages = [
 const BASE_PATH = 
   (location.hostname === "localhost" || location.hostname === "127.0.0.1")
     ? "/"
-    : "/Lab-1---Portfolio/";
+    : "/Lab4/";
 
 const nav = document.createElement("nav");
 
