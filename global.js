@@ -84,77 +84,62 @@ btn.addEventListener("click", () => {
 });
 
 // ───────────────────────────────────
-// DARK MODE TOGGLE BUTTON
+// PROJECTS RENDERING
 // ───────────────────────────────────
 
 export async function fetchJSON(url) {
   try {
     const response = await fetch(url);
-    console.log('fetch response:', response);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch projects: ${response.statusText}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching or parsing JSON data:', error);
-    return [];
-  }
-}
-
-export function renderProjects(projects, containerElement, headingLevel = 'h2') {
-  if (!(containerElement instanceof HTMLElement)) {
-    console.error('renderProjects: invalid containerElement', containerElement);
-    return;
-  }
-
-  containerElement.innerHTML = '';
-
-  if (!Array.isArray(projects) || projects.length === 0) {
-    containerElement.innerHTML = `<p>No projects to display.</p>`;
-    return;
-  }
-
-  projects.forEach(project => {
-    const article = document.createElement('article');
-
-    let heading;
-    try {
-      heading = document.createElement(headingLevel);
-    } catch {
-      heading = document.createElement('h2');
-    }
-    heading.textContent = project.title || 'Untitled project';
-    article.appendChild(heading);
-
-    if (project.image) {
-      const img = document.createElement('img');
-      img.src = project.image;
-      img.alt = project.title || '';
-      article.appendChild(img);
-    }
-
-    const desc = document.createElement('p');
-    desc.textContent = project.description || '';
-    article.appendChild(desc);
-
-    containerElement.appendChild(article);
-  });
-}
-
-export async function fetchJSON(url) {
-  try {
-    const response = await fetch(url);
-    console.log('fetch response:', response);
+    console.log("fetch response:", response);
     if (!response.ok) {
       throw new Error(`Failed to fetch: ${response.statusText}`);
     }
     return await response.json();
-  } catch (error) {
-    console.error('Error fetching or parsing JSON data:', error);
+  } catch (err) {
+    console.error("Error fetching/parsing JSON:", err);
     return [];
   }
 }
+
+export function renderProjects(projects, container, headingLevel = "h2") {
+  if (!(container instanceof HTMLElement)) {
+    console.error("renderProjects: invalid container", container);
+    return;
+  }
+  container.innerHTML = "";
+  if (!Array.isArray(projects) || projects.length === 0) {
+    container.innerHTML = "<p>No projects to display.</p>";
+    return;
+  }
+  for (let proj of projects) {
+    const article = document.createElement("article");
+    let h;
+    try {
+      h = document.createElement(headingLevel);
+    } catch {
+      h = document.createElement("h2");
+    }
+    h.textContent = proj.title || "Untitled";
+    article.appendChild(h);
+
+    if (proj.image) {
+      const img = document.createElement("img");
+      img.src = proj.image;
+      img.alt = proj.title || "";
+      article.appendChild(img);
+    }
+
+    const p = document.createElement("p");
+    p.textContent = proj.description || "";
+    article.appendChild(p);
+
+    container.appendChild(article);
+  }
+}
+
+// ───────────────────────────────────
+// GITHUB FETCHING
+// ───────────────────────────────────
 
 export async function fetchGitHubData(username) {
   return await fetchJSON(`https://api.github.com/users/${username}`);
