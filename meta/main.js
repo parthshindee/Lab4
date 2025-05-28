@@ -18,18 +18,18 @@ function processCommits(data) {
       const dt    = first.datetime;
       const summary = {
         id,
-        author:     first.author,
-        date:       first.date,
-        datetime:   dt,
-        hourFrac:   dt.getHours() + dt.getMinutes()/60,
+        author: first.author,
+        date: first.date,
+        datetime: dt,
+        hourFrac: dt.getHours() + dt.getMinutes()/60,
         totalLines: lines.length,
-        url:        `https://github.com/parthshindee/Lab4/commit/${id}`
+        url: `https://github.com/parthshindee/Lab4/commit/${id}`
       };
       Object.defineProperty(summary, 'lines', {
-        value:       lines,
-        writable:    false,
-        configurable:false,
-        enumerable:  false
+        value: lines,
+        writable: false,
+        configurable: false,
+        enumerable: false
       });
       return summary;
     });
@@ -96,7 +96,7 @@ function renderScatterPlot(data, commits) {
     right: width - margin.right,
     top: margin.top,
     bottom: height - margin.bottom,
-    width: width  - margin.left - margin.right,
+    width: width - margin.left - margin.right,
     height: height - margin.top  - margin.bottom
   };
 
@@ -109,37 +109,48 @@ function renderScatterPlot(data, commits) {
     .domain(d3.extent(commits, d => d.datetime))
     .range([usable.left, usable.right])
     .nice();
+
   const yScale = d3.scaleLinear()
     .domain([0, 24])
     .range([usable.bottom, usable.top]);
 
+  const [minLines, maxLines] = d3.extent(commits, d => d.totalLines);
+  const rScale = d3.scaleSqrt()
+    .domain([minLines, maxLines])
+    .range([2, 30]);
+
   svg.append('g')
     .attr('class', 'gridlines')
-    .attr('transform', `translate(${usable.left}, 0)`)
+    .attr('transform', `translate(${usable.left},0)`)
     .call(d3.axisLeft(yScale)
       .tickFormat('')
       .tickSize(-usable.width)
     );
 
   svg.append('g')
-    .attr('transform', `translate(0, ${usable.bottom})`)
+    .attr('transform', `translate(0,${usable.bottom})`)
     .call(d3.axisBottom(xScale));
   svg.append('g')
-    .attr('transform', `translate(${usable.left}, 0)`)
+    .attr('transform', `translate(${usable.left},0)`)
     .call(d3.axisLeft(yScale)
-      .tickFormat(d => String(d % 24).padStart(2, '0') + ':00')
+      .tickFormat(d => String(d % 24).padStart(2,'0') + ':00')
     );
+
+  const sorted = d3.sort(commits, d => -d.totalLines);
 
   svg.append('g')
       .attr('class', 'dots')
     .selectAll('circle')
-    .data(commits)
+    .data(sorted)
     .join('circle')
       .attr('cx', d => xScale(d.datetime))
       .attr('cy', d => yScale(d.hourFrac))
-      .attr('r', 5)
-      .attr('fill', 'steelblue')
+      .attr('r',  d => rScale(d.totalLines))
+      .style('fill', 'steelblue')
+      .style('fill-opacity', 0.7)
       .on('mouseenter', (event, commit) => {
+        d3.select(event.currentTarget)
+          .style('fill-opacity', 1);
         renderTooltipContent(commit);
         updateTooltipPosition(event);
         updateTooltipVisibility(true);
@@ -147,7 +158,9 @@ function renderScatterPlot(data, commits) {
       .on('mousemove', event => {
         updateTooltipPosition(event);
       })
-      .on('mouseleave', () => {
+      .on('mouseleave', (event) => {
+        d3.select(event.currentTarget)
+          .style('fill-opacity', 0.7);
         updateTooltipVisibility(false);
       });
 }
