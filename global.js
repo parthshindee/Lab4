@@ -44,7 +44,7 @@ for (let {url, title} of pages) {
   nav.append(a);
 }
 
-document.body.append(nav);
+document.body.prepend(nav);
 
 // ───────────────────────────────────
 // DARK MODE TOGGLE BUTTON
