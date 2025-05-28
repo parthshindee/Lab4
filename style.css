@@ -284,3 +284,22 @@ body.resume-page #contact-info a:hover {
   grid-row: 2;
   margin: 0;
 }
+
+.project-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.project-year {
+  color: gray;
+  font-family: Baskerville, serif;
+  font-variant-numeric: oldstyle-nums;
+  margin: 0;
+}
+
+#projects-pie-plot {
+  max-width: 20em;
+  margin-block: 2em;
+  overflow: visible;
+}
