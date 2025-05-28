@@ -267,3 +267,20 @@ body.resume-page #contact-info a:hover {
 .theme-toggle:hover {
   background: color-mix(in oklch, var(--color-accent) 80%, canvas 20%);
 }
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  text-align: center;
+}
+
+.profile-grid dt {
+  grid-row: 1;
+  font-weight: bold;
+}
+
+.profile-grid dd {
+  grid-row: 2;
+  margin: 0;
+}
