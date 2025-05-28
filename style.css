@@ -355,3 +355,24 @@ body.resume-page #contact-info a:hover {
   border: 1px solid var(--border-color);
   border-radius: 0.25em;
 }
+
+#projects-pie-plot:has(path:hover) path:not(:hover) {
+  opacity: 0.5;
+}
+#projects-pie-plot path {
+  transition: opacity 300ms;
+  cursor: pointer;
+}
+
+#projects-pie-plot path.selected {
+  stroke: oklch(60% 45% 0);
+  stroke-width: 4px;
+}
+
+.legend-item {
+  cursor: pointer;
+}
+.legend-item.selected {
+  font-weight: bold;
+  outline: 2px solid oklch(60% 45% 0);
+}
