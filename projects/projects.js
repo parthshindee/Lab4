@@ -28,9 +28,18 @@ import { fetchJSON } from '../global.js';
   }
   const svg = d3.select('#projects-pie-plot');
   const arcGen = d3.arc().innerRadius(0).outerRadius(50);
-  const data = [1, 2, 5, 6];
+  const rolled = d3.rollups(
+      projects,
+      v => v.length,
+      d => d.year
+  );
+  rolled.sort(([aYear], [bYear]) => d3.ascending(aYear, bYear));
+  const data = rolled.map(([year, count]) => ({
+      value: count,
+      label: String(year)
+  }));
 
-  const pieGen = d3.pie();
+  const pieGen = d3.pie().value(d => d.value);
   let arcData = pieGen(data);
 
   const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
@@ -40,5 +49,18 @@ import { fetchJSON } from '../global.js';
       .append('path')
       .attr('d', arcGen(d))
       .attr('fill', colorScale(i));
+  });
+
+  const legend = d3.select('ul.legend');
+
+  data.forEach((d, i) => {
+    legend
+      .append('li')
+      .attr('class', 'legend-item')
+      .attr('style', `--color: ${colorScale(i)}`)
+      .html(`
+        <span class="swatch"></span>
+        ${d.label} <em>(${d.value})</em>
+      `);
   });
 })();
