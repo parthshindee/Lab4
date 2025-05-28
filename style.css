@@ -344,3 +344,14 @@ body.resume-page #contact-info a:hover {
   font-style: normal;
   color: gray;
 }
+
+.searchBar {
+  display: block;
+  width: 100%;
+  max-width: 20em;
+  margin: 1em auto;
+  padding: 0.5em;
+  font: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25em;
+}

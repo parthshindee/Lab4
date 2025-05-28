@@ -1,66 +1,73 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7.9.0/+esm';
-
-import { fetchJSON } from '../global.js';
+import { fetchJSON, renderProjects } from '../global.js';
 
 ;(async () => {
-  const projects = await fetchJSON('../lib/projects.json');
 
+  const allProjects = await fetchJSON('../lib/projects.json');
+  const projectsContainer = document.querySelector('.projects');
   const titleEl = document.querySelector('.projects-title');
-  if (titleEl) {
-    const n = Array.isArray(projects) ? projects.length : 0;
-    titleEl.textContent = `Projects (${n})`;
+
+  function updateDisplay(filtered) {
+    renderProjects(filtered, projectsContainer, 'h2');
+    if (titleEl) {
+      titleEl.textContent = `Projects (${filtered.length})`;
+    }
+    renderPieChart(filtered);
   }
 
-  const container = document.querySelector('.projects');
-  container.innerHTML = ''; 
-
-  for (let proj of projects) {
-    const article = document.createElement('article');
-    article.innerHTML = `
-      <h2>${proj.title}</h2>
-      ${proj.image ? `<img src="${proj.image}" alt="${proj.title}">` : ''}
-      <div class="project-text">
-        <p>${proj.description}</p>
-        <p class="project-year">${proj.year}</p>
-      </div>
-    `;
-    container.append(article);
-  }
-  const svg = d3.select('#projects-pie-plot');
-  const arcGen = d3.arc().innerRadius(0).outerRadius(50);
-  const rolled = d3.rollups(
-      projects,
+  function renderPieChart(projectsGiven) {
+    const rolled = d3.rollups(
+      projectsGiven,
       v => v.length,
       d => d.year
-  );
-  rolled.sort(([aYear], [bYear]) => d3.ascending(aYear, bYear));
-  const data = rolled.map(([year, count]) => ({
-      value: count,
-      label: String(year)
-  }));
+    );
+    rolled.sort(([a], [b]) => d3.ascending(a, b));
 
-  const pieGen = d3.pie().value(d => d.value);
-  let arcData = pieGen(data);
+    const data = rolled.map(([year, count]) => ({
+      label: String(year),
+      value: count
+    }));
 
-  const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
+    const pieGen = d3.pie().value(d => d.value);
+    const arcGen = d3.arc().innerRadius(0).outerRadius(50);
+    const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
 
-  arcData.forEach((d, i) => {
-    svg
-      .append('path')
-      .attr('d', arcGen(d))
-      .attr('fill', colorScale(i));
-  });
+    const svg = d3.select('#projects-pie-plot');
+    const legend = d3.select('ul.legend');
+    svg.selectAll('path').remove();
+    legend.selectAll('li').remove();
 
-  const legend = d3.select('ul.legend');
+    svg.selectAll('path')
+      .data(pieGen(data))
+      .join('path')
+        .attr('d', arcGen)
+        .attr('fill', (_, i) => colorScale(i));
 
-  data.forEach((d, i) => {
-    legend
-      .append('li')
-      .attr('class', 'legend-item')
-      .attr('style', `--color: ${colorScale(i)}`)
-      .html(`
-        <span class="swatch"></span>
-        ${d.label} <em>(${d.value})</em>
-      `);
-  });
+    legend.selectAll('li')
+      .data(data)
+      .join('li')
+        .attr('class', 'legend-item')
+        .style('--color', (_, i) => colorScale(i))
+        .html(d => `
+          <span class="swatch"></span>
+          ${d.label} <em>(${d.value})</em>
+        `);
+  }
+
+  updateDisplay(allProjects);
+
+  let query = '';
+  const searchInput = document.querySelector('.searchBar');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      query = e.target.value.trim().toLowerCase();
+      const filtered = allProjects.filter(proj => {
+        const text = Object.values(proj)
+                           .join(' ')
+                           .toLowerCase();
+        return text.includes(query);
+      });
+      updateDisplay(filtered);
+    });
+  }
 })();
